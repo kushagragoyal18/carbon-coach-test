@@ -1,0 +1,28 @@
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA", "."]
+
+  # Push the container image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"]
+
+  # Deploy to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "carboncoach"
+      - "--image"
+      - "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+      - "--set-secrets"
+      - "GEMINI_API_KEY=GEMINI_API_KEY:latest"
+
+images:
+  - "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"
