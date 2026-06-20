@@ -84,3 +84,26 @@ graph TD
    npm run dev
    ```
 4. Access the UI at `http://localhost:5173`.
+
+---
+
+## Netlify Frontend Deploy
+
+This repository includes `netlify.toml` for deploying the Vite frontend from the
+`frontend/` subdirectory:
+
+- Base directory: `frontend`
+- Build command: `npm run build`
+- Publish directory: `frontend/dist`
+
+Netlify only hosts the static React frontend. Deploy the FastAPI backend
+separately, for example with the included Dockerfile on Cloud Run, then set this
+Netlify environment variable:
+
+```bash
+VITE_API_BASE_URL=https://your-backend.example.com/api
+```
+
+If `VITE_API_BASE_URL` is not set, the frontend defaults to `/api`, which is only
+appropriate when the frontend and FastAPI backend are served from the same origin
+or when Vite's local dev proxy is running.

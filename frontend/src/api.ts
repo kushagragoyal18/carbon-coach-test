@@ -107,7 +107,7 @@ function getDeviceUUID(): string {
 
 // ---- Base Fetch ----
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const API_UNAVAILABLE_MESSAGE =
   'Unable to reach the CarbonCoach API. Make sure the backend is running and try again.';
 
