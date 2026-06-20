@@ -1,11 +1,25 @@
 steps:
+  # Ensure the Artifact Registry Docker repository exists.
+  # If this step fails, grant the Cloud Build service account Artifact Registry admin
+  # permissions or create the repository once in the Google Cloud Console.
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gcloud artifacts repositories describe "${_REPOSITORY}" --location="${_AR_LOCATION}" >/dev/null 2>&1 \
+          || gcloud artifacts repositories create "${_REPOSITORY}" \
+            --repository-format=docker \
+            --location="${_AR_LOCATION}" \
+            --description="CarbonCoach container images"
+
   # Build the container image
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA", "."]
+    args: ["build", "-t", "${_AR_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/app:$BUILD_ID", "."]
 
   # Push the container image to Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"]
+    args: ["push", "${_AR_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/app:$BUILD_ID"]
 
   # Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -13,16 +27,22 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "carboncoach"
+      - "${_SERVICE_NAME}"
       - "--image"
-      - "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"
+      - "${_AR_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/app:$BUILD_ID"
       - "--region"
-      - "us-central1"
+      - "${_REGION}"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
-      - "--set-secrets"
-      - "GEMINI_API_KEY=GEMINI_API_KEY:latest"
+      - "--set-env-vars"
+      - "APP_NAME=CarbonCoach"
 
 images:
-  - "us-docker.pkg.dev/$PROJECT_ID/carboncoach/app:$SHORT_SHA"
+  - "${_AR_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/app:$BUILD_ID"
+
+substitutions:
+  _AR_LOCATION: "us"
+  _REGION: "us-central1"
+  _REPOSITORY: "carboncoach"
+  _SERVICE_NAME: "carboncoach"
