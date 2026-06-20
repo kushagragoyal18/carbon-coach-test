@@ -180,6 +180,9 @@ Render and keep the frontend on Netlify.
    ```bash
    CORS_ORIGINS=https://YOUR-NETLIFY-SITE.netlify.app
    ```
+   This is a custom environment variable. In Render, open the service,
+   go to **Environment**, click **Edit**, add a new key named
+   `CORS_ORIGINS`, and paste your Netlify URL as the value.
 5. In Netlify environment variables, set:
    ```bash
    VITE_API_BASE_URL=https://carboncoach-api.onrender.com/api

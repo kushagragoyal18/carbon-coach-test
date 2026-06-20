@@ -46,3 +46,5 @@ Add a no-Google-billing backend deployment path.
 - `render.yaml` deploys the `backend/` folder as a Python web service named `carboncoach-api`.
 - Netlify must set `VITE_API_BASE_URL` to the Render backend URL with `/api` appended.
 - Render must set `CORS_ORIGINS` to the Netlify site URL.
+- `CORS_ORIGINS` is a custom Render environment variable, not a built-in option; add it under Environment > Edit.
+- `render.yaml` now includes a placeholder `CORS_ORIGINS` value that must be replaced with the real Netlify site URL.
